@@ -1,8 +1,8 @@
-from sqlmodel import SQLModel, create_engine
+from sqlmodel import create_engine
 from src.config import settings
 
 engine = create_engine(settings.DATABASE_URL, echo=True)
 
 
-def init_db():
-    SQLModel.metadata.create_all(engine)
+# def init_db():
+#     SQLModel.metadata.create_all(engine)
