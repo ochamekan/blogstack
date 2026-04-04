@@ -1,13 +1,13 @@
 from typing import Annotated
 
 from fastapi import Depends
-from sqlmodel import Session
 
 from src.auth.repository import AuthRepository
 from src.auth.service import AuthService
+from src.deps import SessionDep
 
 
-def get_auth_repo(db: Session) -> AuthRepository:
+def get_auth_repo(db: SessionDep) -> AuthRepository:
     return AuthRepository(db)
 
 

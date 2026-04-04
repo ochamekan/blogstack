@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status
+from fastapi import APIRouter, HTTPException, status
 
 from src.auth.deps import AuthServiceDep
 from src.auth.schemes import CreateUserRequest, CreateUserResponse
@@ -16,4 +16,9 @@ async def login(_: AuthServiceDep):
     "/signup", status_code=status.HTTP_201_CREATED, response_model=CreateUserResponse
 )
 async def signup(body: CreateUserRequest, service: AuthServiceDep):
-    return service.signup(body)
+    try:
+        return service.signup(body)
+    except Exception as err:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=err
+        )
