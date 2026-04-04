@@ -12,4 +12,6 @@ class AuthService:
             raise Exception("Email already taken")
 
         user = User.model_validate(data, update={"hashed_password": "somehashedpswrd"})
-        return user
+        new_user = self._repo.create_user(user)
+
+        return new_user

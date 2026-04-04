@@ -1,5 +1,5 @@
 from typing import ClassVar
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class CreateUserRequest(BaseModel):
@@ -8,9 +8,10 @@ class CreateUserRequest(BaseModel):
         "extra": "ignore",
     }
 
-    email: str = Field(min_length=6)
+    email: EmailStr = Field(min_length=6)
     password: str = Field(min_length=8)
     fullname: str = Field(min_length=5)
+    about: str | None = Field(default=None, min_length=10)
 
 
 class CreateUserResponse(BaseModel):
