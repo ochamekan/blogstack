@@ -18,8 +18,7 @@ async def login(_: AuthServiceDep):
 async def signup(body: CreateUserRequest, service: AuthServiceDep):
     try:
         return service.signup(body)
-    except Exception as err:
-        print(err)
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error occured.",

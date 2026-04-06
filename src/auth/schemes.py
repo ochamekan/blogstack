@@ -18,3 +18,4 @@ class CreateUserResponse(BaseModel):
     id: str
     email: str
     fullname: str
+    about: str | None = None
