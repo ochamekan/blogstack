@@ -1,16 +1,29 @@
 from fastapi import APIRouter, HTTPException, status
 
-from src.auth.deps import AuthServiceDep
-from src.auth.exceptions import EmailAlreadyTaken
-from src.auth.schemes import CreateUserRequest, CreateUserResponse
+from src.auth.deps import AuthServiceDep, UserDep
+from src.auth.exceptions import EmailAlreadyTaken, IncorrectPassword, UserDoesNotExist
+from src.auth.schemes import (
+    CreateUserRequest,
+    CreateUserResponse,
+    GetCurrentUserRequest,
+    LoginRequest,
+)
+from src.security.schemes import Tokens
 
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 @router.post("/login")
-async def login(_: AuthServiceDep):
-    pass
+async def login(body: LoginRequest, service: AuthServiceDep) -> Tokens:
+    try:
+        return service.login(body)
+    except UserDoesNotExist as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=e.detail)
+    except IncorrectPassword as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=e.detail)
+    except Exception:
+        raise
 
 
 @router.post(
@@ -19,11 +32,12 @@ async def login(_: AuthServiceDep):
 async def signup(body: CreateUserRequest, service: AuthServiceDep):
     try:
         return service.signup(body)
-    except EmailAlreadyTaken as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=e)
+    except EmailAlreadyTaken as err:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=err.detail)
     except Exception:
         raise
-        # raise HTTPException(
-        #     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        #     detail="Internal server error occured.",
-        # )
+
+
+@router.get("/me", response_model=GetCurrentUserRequest)
+async def read_user(user: UserDep):
+    return user

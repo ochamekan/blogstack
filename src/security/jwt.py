@@ -18,7 +18,7 @@ class TokenType(Enum):
 
 
 class ClaimsBase(BaseModel):
-    exp: datetime.datetime
+    exp: int
     jti: uuid.UUID
     type: TokenType
 
@@ -33,12 +33,16 @@ class RTClaims(ClaimsBase):
     sub: str
 
 
-def create_access_token(email: str, role: Role, user_id: str) -> str:
+def create_access_token(*, email: str, role: Role, user_id: str) -> str:
     claims = ATClaims(
         email=email,
         role=role,
-        exp=datetime.datetime.now(datetime.UTC)
-        + datetime.timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),
+        exp=int(
+            (
+                datetime.datetime.now(datetime.UTC)
+                + datetime.timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+            ).timestamp()
+        ),
         jti=uuid.uuid4(),
         type=TokenType.ACCESS,
         sub=user_id,
@@ -54,8 +58,12 @@ def create_refresh_token(user_id: str) -> str:
     claims = RTClaims(
         sub=user_id,
         type=TokenType.REFRESH,
-        exp=datetime.datetime.now(datetime.UTC)
-        + datetime.timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS),
+        exp=int(
+            (
+                datetime.datetime.now(datetime.UTC)
+                + datetime.timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+            ).timestamp()
+        ),
         jti=uuid.uuid4(),
     )
     return jwt.encode(  # pyright: ignore[reportUnknownMemberType]
@@ -79,9 +87,9 @@ def decode_token(token: str) -> ATClaims | RTClaims:
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
         )
 
-    if data.get("type") == TokenType.ACCESS:
+    if data.get("type") == TokenType.ACCESS.value:
         return ATClaims.model_validate(data)
-    elif data.get("type") == TokenType.REFRESH:
+    elif data.get("type") == TokenType.REFRESH.value:
         return RTClaims.model_validate(data)
     else:
         raise HTTPException(

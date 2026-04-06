@@ -1,5 +1,8 @@
+from datetime import datetime
 from typing import ClassVar
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
+
+from src.auth.models import Role
 
 
 class CreateUserRequest(BaseModel):
@@ -19,3 +22,19 @@ class CreateUserResponse(BaseModel):
     email: str
     fullname: str
     about: str | None = None
+    role: Role
+
+
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str
+
+
+class GetCurrentUserRequest(BaseModel):
+    id: str
+    email: str
+    fullname: str
+    about: str | None = None
+    role: Role
+    created_at: datetime
+    updated_at: datetime
