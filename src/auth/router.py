@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, status
 
 from src.auth.deps import AuthServiceDep
+from src.auth.exceptions import EmailAlreadyTaken
 from src.auth.schemes import CreateUserRequest, CreateUserResponse
 
 
@@ -18,8 +19,11 @@ async def login(_: AuthServiceDep):
 async def signup(body: CreateUserRequest, service: AuthServiceDep):
     try:
         return service.signup(body)
+    except EmailAlreadyTaken as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=e)
     except Exception:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error occured.",
-        )
+        raise
+        # raise HTTPException(
+        #     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        #     detail="Internal server error occured.",
+        # )

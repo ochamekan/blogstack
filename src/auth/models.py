@@ -1,7 +1,13 @@
 from datetime import datetime
+from enum import Enum
 from sqlmodel import SQLModel, Field
 from sqlalchemy import Column, DateTime
 import uuid
+
+
+class Role(Enum):
+    USER = "user"
+    ADMIN = "admin"
 
 
 class User(SQLModel, table=True):
@@ -12,6 +18,7 @@ class User(SQLModel, table=True):
     hashed_password: str = Field(nullable=False)
     fullname: str = Field(nullable=False, min_length=5)
     about: str | None = Field(default=None)
+    role: Role | None = Field(default=Role.USER)
 
     created_at: datetime = Field(
         default_factory=datetime.utcnow,  # or datetime.now(timezone.utc) for better timezone handling
