@@ -1,15 +1,21 @@
 from pydantic import ValidationError
 from src.auth.exceptions import (
     EmailAlreadyTaken,
-    IncorrectPassword,
+    InvalidCredentials,
+    InvalidToken,
     NotAuthenticated,
     UserDoesNotExist,
 )
 from src.auth.models import User
 from src.auth.repository import AuthRepository
 from src.auth.schemes import CreateUserRequest, LoginRequest
-from src.security.jwt import create_access_token, create_refresh_token
-from src.security.schemes import Tokens
+from src.security.jwt import (
+    TokenType,
+    create_access_token,
+    create_refresh_token,
+    decode_token,
+)
+from src.security.schemes import RefreshTokenResponse, Tokens
 from src.security.utils import hash_password, verify_password
 
 
@@ -33,16 +39,29 @@ class AuthService:
 
     def login(self, data: LoginRequest) -> Tokens:
         user = self._repo.get_user_by_email(data.email)
-        if not user:
-            raise UserDoesNotExist
-        if not verify_password(data.password, user.hashed_password):
-            raise IncorrectPassword
+        if not user or not verify_password(data.password, user.hashed_password):
+            raise InvalidCredentials
 
         access_token = create_access_token(
             email=user.email, user_id=user.id, role=user.role
         )
         refresh_token = create_refresh_token(user.id)
-        return Tokens(access_token=access_token, refresh_token=refresh_token)
+        return Tokens(
+            access_token=access_token, refresh_token=refresh_token, token_type="bearer"
+        )
+
+    def refresh(self, refresh_token: str) -> RefreshTokenResponse:
+        claims = decode_token(refresh_token)
+        id = claims.sub
+        if not claims.type == TokenType.REFRESH or not id:
+            raise InvalidToken
+        user = self._repo.get_user_by_id(id)
+        if not user:
+            raise UserDoesNotExist
+        new_access_token = create_access_token(
+            email=user.email, role=user.role, user_id=user.id
+        )
+        return RefreshTokenResponse(access_token=new_access_token, token_type="bearer")
 
     def get_user_by_id(self, id: str) -> User | None:
         user = self._repo.get_user_by_id(id)

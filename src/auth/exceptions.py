@@ -25,3 +25,9 @@ class InvalidToken(Exception):
     status_code: int = status.HTTP_401_UNAUTHORIZED
     detail: str = "Invalid token"
     headers: dict[str, str] = {"WWW-Authenticate": "Bearer"}
+
+
+class InvalidCredentials(Exception):
+    status_code: int = status.HTTP_400_BAD_REQUEST
+    detail: str = "Invalid credentials"
+    headers: dict[str, str] = {"WWW-Authenticate": "Bearer"}

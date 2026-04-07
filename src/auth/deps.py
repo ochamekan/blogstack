@@ -9,7 +9,7 @@ from src.auth.service import AuthService
 from src.deps import SessionDep
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from src.security.jwt import decode_token
+from src.security.jwt import TokenType, decode_token
 
 bearer_scheme = HTTPBearer()
 
@@ -34,7 +34,7 @@ def get_current_user(service: AuthServiceDep, creds: TokenDep) -> User:
         token = creds.credentials
         claims = decode_token(token)
         id = claims.sub
-        if not id:
+        if not claims.type == TokenType.ACCESS or not id:
             raise InvalidToken
         user = service.get_user_by_id(id)
         if not user:
