@@ -46,9 +46,7 @@ class AuthService:
             email=user.email, user_id=user.id, role=user.role
         )
         refresh_token = create_refresh_token(user.id)
-        return Tokens(
-            access_token=access_token, refresh_token=refresh_token, token_type="bearer"
-        )
+        return Tokens(access_token=access_token, refresh_token=refresh_token)
 
     def refresh(self, refresh_token: str) -> RefreshTokenResponse:
         try:
