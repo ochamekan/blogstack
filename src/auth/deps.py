@@ -2,13 +2,19 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from src.auth.exceptions import InvalidToken, NotAuthenticated
+from src.auth.exceptions import NotAuthenticatedError, UserNotFoundError
 from src.auth.models import User
 from src.auth.repository import AuthRepository
 from src.auth.service import AuthService
 from src.deps import SessionDep
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
+from src.security.exceptions import (
+    InvalidTokenSignatureError,
+    MalformedTokenError,
+    TokenDecodeError,
+    TokenExpiredError,
+)
 from src.security.jwt import TokenType, decode_token
 
 bearer_scheme = HTTPBearer()
@@ -30,18 +36,25 @@ TokenDep = Annotated[HTTPAuthorizationCredentials, Depends(bearer_scheme)]
 
 
 def get_current_user(service: AuthServiceDep, creds: TokenDep) -> User:
+    token = creds.credentials
+
     try:
-        token = creds.credentials
         claims = decode_token(token)
-        id = claims.sub
-        if not claims.type == TokenType.ACCESS or not id:
-            raise InvalidToken
-        user = service.get_user_by_id(id)
-        if not user:
-            raise NotAuthenticated
-        return user
-    except Exception:
-        raise
+    except (
+        TokenDecodeError,
+        TokenExpiredError,
+        InvalidTokenSignatureError,
+        MalformedTokenError,
+    ):
+        raise InvalidTokenSignatureError
+
+    id = claims.sub
+    if not claims or not claims.type == TokenType.ACCESS or not id:
+        raise NotAuthenticatedError
+    user = service.get_user_by_id(id)
+    if not user:
+        raise UserNotFoundError
+    return user
 
 
 UserDep = Annotated[User, Depends(get_current_user)]

@@ -1,7 +1,6 @@
 import datetime
 from enum import Enum
 import uuid
-from fastapi import HTTPException, status
 import jwt
 from jwt.exceptions import (
     ExpiredSignatureError,
@@ -10,6 +9,12 @@ from jwt.exceptions import (
 from pydantic import BaseModel, EmailStr
 from src.auth.models import Role
 from src.config import settings
+from src.security.exceptions import (
+    InvalidTokenSignatureError,
+    MalformedTokenError,
+    TokenDecodeError,
+    TokenExpiredError,
+)
 
 
 class TokenType(Enum):
@@ -79,19 +84,15 @@ def decode_token(token: str) -> ATClaims | RTClaims:
             token, key=settings.SECRET_KEY, algorithms=[settings.JWT_ALGORITHM]
         )
     except ExpiredSignatureError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Token expired"
-        )
+        raise TokenExpiredError
     except InvalidTokenError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
-        )
+        raise InvalidTokenSignatureError
+    except jwt.PyJWTError:
+        raise TokenDecodeError
 
     if data.get("type") == TokenType.ACCESS.value:
         return ATClaims.model_validate(data)
     elif data.get("type") == TokenType.REFRESH.value:
         return RTClaims.model_validate(data)
     else:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Malformed token claims"
-        )
+        raise MalformedTokenError

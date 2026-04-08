@@ -1,14 +1,18 @@
-from pydantic import ValidationError
 from src.auth.exceptions import (
-    EmailAlreadyTaken,
-    InvalidCredentials,
-    InvalidToken,
-    NotAuthenticated,
-    UserDoesNotExist,
+    EmailAlreadyTakenError,
+    InvalidCredentialsError,
+    NotAuthenticatedError,
+    UserNotFoundError,
 )
 from src.auth.models import User
 from src.auth.repository import AuthRepository
 from src.auth.schemes import CreateUserRequest, LoginRequest
+from src.security.exceptions import (
+    InvalidTokenSignatureError,
+    MalformedTokenError,
+    TokenDecodeError,
+    TokenExpiredError,
+)
 from src.security.jwt import (
     TokenType,
     create_access_token,
@@ -25,22 +29,18 @@ class AuthService:
 
     def signup(self, data: CreateUserRequest) -> User:
         if self._repo.get_user_by_email(data.email):
-            raise EmailAlreadyTaken
+            raise EmailAlreadyTakenError
 
-        try:
-            user = User.model_validate(
-                data, update={"hashed_password": hash_password(data.password)}
-            )
-        except ValidationError:
-            raise
-
+        user = User.model_validate(
+            data, update={"hashed_password": hash_password(data.password)}
+        )
         new_user = self._repo.create_user(user)
         return new_user
 
     def login(self, data: LoginRequest) -> Tokens:
         user = self._repo.get_user_by_email(data.email)
         if not user or not verify_password(data.password, user.hashed_password):
-            raise InvalidCredentials
+            raise InvalidCredentialsError
 
         access_token = create_access_token(
             email=user.email, user_id=user.id, role=user.role
@@ -51,13 +51,24 @@ class AuthService:
         )
 
     def refresh(self, refresh_token: str) -> RefreshTokenResponse:
-        claims = decode_token(refresh_token)
+        try:
+            claims = decode_token(refresh_token)
+        except (
+            TokenDecodeError,
+            TokenExpiredError,
+            InvalidTokenSignatureError,
+            MalformedTokenError,
+        ):
+            raise InvalidTokenSignatureError
+
         id = claims.sub
-        if not claims.type == TokenType.REFRESH or not id:
-            raise InvalidToken
+        if not claims or not claims.type == TokenType.REFRESH or not id:
+            raise InvalidTokenSignatureError
+
         user = self._repo.get_user_by_id(id)
         if not user:
-            raise UserDoesNotExist
+            raise InvalidTokenSignatureError
+
         new_access_token = create_access_token(
             email=user.email, role=user.role, user_id=user.id
         )
@@ -66,7 +77,5 @@ class AuthService:
     def get_user_by_id(self, id: str) -> User | None:
         user = self._repo.get_user_by_id(id)
         if not user:
-            raise UserDoesNotExist
-        if not id == user.id:
-            raise NotAuthenticated
+            raise UserNotFoundError
         return user

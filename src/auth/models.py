@@ -21,12 +21,12 @@ class User(SQLModel, table=True):
     role: Role = Field(default=Role.USER.value, nullable=False)
 
     created_at: datetime = Field(
-        default_factory=datetime.utcnow,  # or datetime.now(timezone.utc) for better timezone handling
+        default_factory=datetime.utcnow,
         nullable=False,
     )
 
     updated_at: datetime = Field(
-        default_factory=datetime.utcnow,  # ← This is the key addition
+        default_factory=datetime.utcnow,
         sa_column=Column(
             DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
         ),

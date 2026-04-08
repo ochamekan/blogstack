@@ -16,4 +16,5 @@ class AuthRepository:
     def create_user(self, new_user: User) -> User:
         self._db.add(new_user)
         self._db.commit()
+        self._db.refresh(new_user)
         return new_user

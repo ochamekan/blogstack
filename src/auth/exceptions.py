@@ -1,33 +1,39 @@
 from fastapi import status
 
-
-class EmailAlreadyTaken(Exception):
-    status_code: int = status.HTTP_400_BAD_REQUEST
-    detail: str = "Email already taken"
+from src.exceptions import AppBaseException
 
 
-class UserDoesNotExist(Exception):
-    status_code: int = status.HTTP_400_BAD_REQUEST
-    detail: str = "User with this email does not exist"
+class UserNotFoundError(AppBaseException):
+    def __init__(self) -> None:
+        super().__init__(
+            message="User not found",
+            error_code="USER_NOT_FOUND",
+            status_code=status.HTTP_404_NOT_FOUND,
+        )
 
 
-class IncorrectPassword(Exception):
-    status_code: int = status.HTTP_400_BAD_REQUEST
-    detail: str = "Incorrect password"
+class InvalidCredentialsError(AppBaseException):
+    def __init__(self) -> None:
+        super().__init__(
+            message="Invalid credentials",
+            error_code="INVALID_CREDENTIALS",
+            status_code=status.HTTP_401_UNAUTHORIZED,
+        )
 
 
-class NotAuthenticated(Exception):
-    status_code: int = status.HTTP_401_UNAUTHORIZED
-    detail: str = "Not authenticated"
+class EmailAlreadyTakenError(AppBaseException):
+    def __init__(self) -> None:
+        super().__init__(
+            message="Email already taken",
+            error_code="EMAIL_ALREADY_TAKEN",
+            status_code=status.HTTP_409_CONFLICT,
+        )
 
 
-class InvalidToken(Exception):
-    status_code: int = status.HTTP_401_UNAUTHORIZED
-    detail: str = "Invalid token"
-    headers: dict[str, str] = {"WWW-Authenticate": "Bearer"}
-
-
-class InvalidCredentials(Exception):
-    status_code: int = status.HTTP_400_BAD_REQUEST
-    detail: str = "Invalid credentials"
-    headers: dict[str, str] = {"WWW-Authenticate": "Bearer"}
+class NotAuthenticatedError(AppBaseException):
+    def __init__(self) -> None:
+        super().__init__(
+            message="Not authenticated",
+            error_code="NOT_AUTHENTICATED",
+            status_code=status.HTTP_401_UNAUTHORIZED,
+        )
