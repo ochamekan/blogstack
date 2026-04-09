@@ -19,14 +19,14 @@ router = APIRouter(prefix="/auth", tags=["auth"])
     "/signup", status_code=status.HTTP_201_CREATED, response_model=CreateUserResponse
 )
 async def signup(body: CreateUserRequest, service: AuthServiceDep):
-    return service.signup(body)
+    return await service.signup(body)
 
 
 @router.post("/login")
 async def login(
     body: LoginRequest, service: AuthServiceDep, response: Response
 ) -> LoginResponse:
-    tokens = service.login(body)
+    tokens = await service.login(body)
     response.set_cookie(
         key="refresh_token",
         value=tokens.refresh_token,
@@ -45,7 +45,7 @@ async def refresh(
 ):
     if not refresh_token:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "No refresh token")
-    return service.refresh(refresh_token)
+    return await service.refresh(refresh_token)
 
 
 @router.post("/logout")

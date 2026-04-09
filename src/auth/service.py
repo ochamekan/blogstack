@@ -1,7 +1,6 @@
 from src.auth.exceptions import (
     EmailAlreadyTakenError,
     InvalidCredentialsError,
-    NotAuthenticatedError,
     UserNotFoundError,
 )
 from src.auth.models import User
@@ -27,18 +26,20 @@ class AuthService:
     def __init__(self, repo: AuthRepository):
         self._repo: AuthRepository = repo
 
-    def signup(self, data: CreateUserRequest) -> User:
-        if self._repo.get_user_by_email(data.email):
+    async def signup(self, data: CreateUserRequest) -> User:
+        if await self._repo.get_user_by_email(data.email):
             raise EmailAlreadyTakenError
 
-        user = User.model_validate(
-            data, update={"hashed_password": hash_password(data.password)}
+        user = User(
+            **data.model_dump(exclude={"password"}),
+            hashed_password=hash_password(data.password),
         )
-        new_user = self._repo.create_user(user)
+
+        new_user = await self._repo.create_user(user)
         return new_user
 
-    def login(self, data: LoginRequest) -> Tokens:
-        user = self._repo.get_user_by_email(data.email)
+    async def login(self, data: LoginRequest) -> Tokens:
+        user = await self._repo.get_user_by_email(data.email)
         if not user or not verify_password(data.password, user.hashed_password):
             raise InvalidCredentialsError
 
@@ -48,7 +49,7 @@ class AuthService:
         refresh_token = create_refresh_token(user.id)
         return Tokens(access_token=access_token, refresh_token=refresh_token)
 
-    def refresh(self, refresh_token: str) -> RefreshTokenResponse:
+    async def refresh(self, refresh_token: str) -> RefreshTokenResponse:
         try:
             claims = decode_token(refresh_token)
         except (
@@ -63,7 +64,7 @@ class AuthService:
         if not claims or not claims.type == TokenType.REFRESH or not id:
             raise InvalidTokenSignatureError
 
-        user = self._repo.get_user_by_id(id)
+        user = await self._repo.get_user_by_id(id)
         if not user:
             raise InvalidTokenSignatureError
 
@@ -72,8 +73,8 @@ class AuthService:
         )
         return RefreshTokenResponse(access_token=new_access_token, token_type="bearer")
 
-    def get_user_by_id(self, id: str) -> User | None:
-        user = self._repo.get_user_by_id(id)
+    async def get_user_by_id(self, id: str) -> User:
+        user = await self._repo.get_user_by_id(id)
         if not user:
             raise UserNotFoundError
         return user

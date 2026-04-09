@@ -1,8 +1,13 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
-from sqlmodel import SQLModel, Field
-from sqlalchemy import Column, DateTime
+from sqlalchemy import String, DateTime
+from sqlalchemy import Enum as SAEnum
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 import uuid
+
+
+class Base(DeclarativeBase):
+    pass
 
 
 class Role(str, Enum):
@@ -10,24 +15,27 @@ class Role(str, Enum):
     ADMIN = "admin"
 
 
-class User(SQLModel, table=True):
-    __tablename__: str = "users"  # pyright: ignore[reportIncompatibleVariableOverride]
+class User(Base):
+    __tablename__: str = "users"
 
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
-    email: str = Field(unique=True, nullable=False)
-    hashed_password: str = Field(nullable=False)
-    fullname: str = Field(nullable=False, min_length=5)
-    about: str | None = Field(default=None)
-    role: Role = Field(default=Role.USER.value, nullable=False)
-
-    created_at: datetime = Field(
-        default_factory=datetime.utcnow,
-        nullable=False,
+    id: Mapped[str] = mapped_column(
+        String, primary_key=True, default=lambda: str(uuid.uuid4())
     )
-
-    updated_at: datetime = Field(
-        default_factory=datetime.utcnow,
-        sa_column=Column(
-            DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
-        ),
+    email: Mapped[str] = mapped_column(String, unique=True, nullable=False)
+    hashed_password: Mapped[str] = mapped_column(String, nullable=False)
+    fullname: Mapped[str] = mapped_column(String, nullable=False)
+    about: Mapped[str | None] = mapped_column(String, nullable=True, default=None)
+    role: Mapped[Role] = mapped_column(
+        SAEnum(Role, native_enum=False), nullable=False, default=Role.USER.value
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
     )

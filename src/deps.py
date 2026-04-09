@@ -1,12 +1,13 @@
+from collections.abc import AsyncGenerator
 from typing import Annotated
-from sqlmodel import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Depends
-from src.database import engine
+from src.database import AsyncSessionLocal
 
 
-def get_session():
-    with Session(engine) as session:
+async def get_session() -> AsyncGenerator[AsyncSession, None]:
+    async with AsyncSessionLocal() as session:
         yield session
 
 
-SessionDep = Annotated[Session, Depends(get_session)]
+SessionDep = Annotated[AsyncSession, Depends(get_session)]

@@ -35,7 +35,7 @@ AuthServiceDep = Annotated[AuthService, Depends(get_auth_service)]
 TokenDep = Annotated[HTTPAuthorizationCredentials, Depends(bearer_scheme)]
 
 
-def get_current_user(service: AuthServiceDep, creds: TokenDep) -> User:
+async def get_current_user(service: AuthServiceDep, creds: TokenDep) -> User:
     token = creds.credentials
 
     try:
@@ -51,7 +51,7 @@ def get_current_user(service: AuthServiceDep, creds: TokenDep) -> User:
     id = claims.sub
     if not claims or not claims.type == TokenType.ACCESS or not id:
         raise NotAuthenticatedError
-    user = service.get_user_by_id(id)
+    user = await service.get_user_by_id(id)
     if not user:
         raise UserNotFoundError
     return user
