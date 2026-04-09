@@ -26,7 +26,9 @@ class User(Base):
     fullname: Mapped[str] = mapped_column(String, nullable=False)
     about: Mapped[str | None] = mapped_column(String, nullable=True, default=None)
     role: Mapped[Role] = mapped_column(
-        SAEnum(Role, native_enum=False), nullable=False, default=Role.USER.value
+        SAEnum(Role, native_enum=False, values_callable=lambda x: [e.value for e in x]),
+        nullable=False,
+        default=Role.USER,
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
