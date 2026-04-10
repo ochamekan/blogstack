@@ -38,6 +38,3 @@ class ArticlesRepository:
         await self._db.commit()
         await self._db.refresh(updated_article)
         return updated_article
-
-
-# ceil(items/limit)

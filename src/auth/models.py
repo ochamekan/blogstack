@@ -25,17 +25,19 @@ class User(Base):
     )
 
     id: Mapped[str] = mapped_column(
-        String, primary_key=True, default_factory=lambda: str(uuid.uuid4())
+        String, primary_key=True, default_factory=lambda: str(uuid.uuid4()), init=False
     )
     about: Mapped[str | None] = mapped_column(String, nullable=True, default=None)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
         default_factory=lambda: datetime.now(timezone.utc),
+        init=False,
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
         default_factory=lambda: datetime.now(timezone.utc),
         onupdate=lambda: datetime.now(timezone.utc),
+        init=False,
     )

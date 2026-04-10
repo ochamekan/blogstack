@@ -11,7 +11,3 @@ def get_reading_time(body: str) -> int:
 
     words = len(text.split())
     return max(1, round(words / 200))
-
-
-def get_article_slug(raw_title: str) -> str:
-    return "-".join(raw_title.lower().split(" "))

@@ -10,8 +10,9 @@ from src.articles.schemes import (
     GetArticlesResponse,
     UpdateArticleRequest,
 )
-from src.articles.utils import get_article_slug, get_reading_time
+from src.articles.utils import get_reading_time
 from src.auth.models import User
+from src.utils import get_slug
 
 
 class ArticlesService:
@@ -25,7 +26,7 @@ class ArticlesService:
         )
 
     async def create_article(self, data: CreateArticleRequest, user: User) -> Article:
-        slug = get_article_slug(data.title)
+        slug = get_slug(data.title)
         if await self._repo.get_article_by_slug(slug):
             raise TitleAlreadyExistsError
 
@@ -55,15 +56,13 @@ class ArticlesService:
         if not article.author_id == user.id:
             raise ForbiddenError
 
-        if data.title and await self._repo.get_article_by_slug(
-            get_article_slug(data.title)
-        ):
+        if data.title and await self._repo.get_article_by_slug(get_slug(data.title)):
             raise TitleAlreadyExistsError
 
         if data.body:
             article.body = data.body
         if data.title:
-            article.slug = get_article_slug(data.title)
+            article.slug = get_slug(data.title)
             article.title = data.title
         if data.status:
             article.status = data.status
