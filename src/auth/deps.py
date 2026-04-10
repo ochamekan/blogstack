@@ -1,6 +1,8 @@
 from typing import Annotated
 
 from fastapi import Depends
+from jwt import PyJWT
+import jwt
 
 from src.auth.exceptions import NotAuthenticatedError, UserNotFoundError
 from src.auth.models import User
@@ -45,6 +47,7 @@ async def get_current_user(service: AuthServiceDep, creds: TokenDep) -> User:
         TokenExpiredError,
         InvalidTokenSignatureError,
         MalformedTokenError,
+        jwt.PyJWTError,
     ):
         raise InvalidTokenSignatureError
 

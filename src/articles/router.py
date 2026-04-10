@@ -1,16 +1,20 @@
 from fastapi import APIRouter
 
 from src.articles.deps import ArticleServiceDep
-from src.articles.schemes import CreateArticleRequest
+from src.articles.schemes import (
+    CreateArticleRequest,
+    GetArticlesResponse,
+    UpdateArticleRequest,
+)
 from src.auth.deps import UserDep
 
 
 router = APIRouter(prefix="/articles", tags=["articles"])
 
 
-@router.get("")
-async def get_posts():
-    pass
+@router.get("", response_model=GetArticlesResponse)
+async def get_all(service: ArticleServiceDep, page: int = 1, limit: int = 10):
+    return await service.get_articles(page, limit)
 
 
 @router.post("")
@@ -21,10 +25,12 @@ async def create_article(
 
 
 @router.get("/{slug}")
-async def get_post(slug: str, user: UserDep):
-    pass
+async def get_post(service: ArticleServiceDep, slug: str):
+    return await service.get_aricle_by_slug(slug)
 
 
-@router.put("/{id}")
-async def update_post(id: str, user: UserDep):
-    pass
+@router.put("/{slug}")
+async def update_post(
+    body: UpdateArticleRequest, service: ArticleServiceDep, slug: str, user: UserDep
+):
+    return await service.update_article(body, slug, user)

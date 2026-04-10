@@ -5,6 +5,7 @@ import jwt
 from jwt.exceptions import (
     ExpiredSignatureError,
     InvalidTokenError,
+    MissingCryptographyError,
 )
 from pydantic import BaseModel, EmailStr
 from src.auth.models import Role
