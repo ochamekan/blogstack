@@ -1,4 +1,5 @@
-from fastapi import APIRouter
+from typing import Annotated
+from fastapi import APIRouter, Query
 
 from src.articles.deps import ArticleServiceDep
 from src.articles.schemes import (
@@ -13,7 +14,11 @@ router = APIRouter(prefix="/articles", tags=["articles"])
 
 
 @router.get("", response_model=GetArticlesResponse)
-async def get_all(service: ArticleServiceDep, page: int = 1, limit: int = 10):
+async def get_all(
+    service: ArticleServiceDep,
+    page: Annotated[int, Query(ge=1)] = 1,
+    limit: Annotated[int, Query(ge=1)] = 10,
+):
     return await service.get_articles(page, limit)
 
 
