@@ -1,4 +1,6 @@
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
+from src.article_tags.exceptions import DuplicateOrMissingTagError
 from src.article_tags.models import ArticleTag
 from src.article_tags.repository import ArticleTagsRepository
 from src.articles.exceptions import ForbiddenError
@@ -24,7 +26,10 @@ class ArticleTagsService:
         if article.author_id != user.id:
             raise ForbiddenError
 
-        tags = await self._repo.attach_tags(article.id, data)
-        await self._db.commit()
+        try:
+            tags = await self._repo.attach_tags(article.id, data)
+            await self._db.commit()
+        except IntegrityError:
+            raise DuplicateOrMissingTagError
 
         return tags
