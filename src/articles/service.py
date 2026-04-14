@@ -47,6 +47,12 @@ class ArticlesService:
             raise ArticleNotFoundError
         return article
 
+    async def get_article_by_id(self, id: str) -> Article:
+        article = await self._repo.get_article_by_id(id)
+        if not article:
+            raise ArticleNotFoundError
+        return article
+
     async def update_article(
         self, data: UpdateArticleRequest, slug: str, user: User
     ) -> Article:

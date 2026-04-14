@@ -13,3 +13,6 @@ class TagsService:
 
     async def get_tags(self, q: str) -> list[Tag]:
         return await self._repo.get_tags(q)
+
+    async def get_tag_by_name(self, name: str) -> Tag | None:
+        return await self._repo.get_tag(name)

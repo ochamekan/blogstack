@@ -19,3 +19,7 @@ class TagsRepository:
         )
         tags = list(result.scalars().all())
         return tags
+
+    async def get_tag(self, name: str) -> Tag | None:
+        result = await self._db.execute(select(Tag).where(Tag.name == name))
+        return result.scalar_one_or_none()

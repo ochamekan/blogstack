@@ -33,6 +33,10 @@ class ArticlesRepository:
         article = await self._db.execute(select(Article).where(Article.slug == slug))
         return article.scalar_one_or_none()
 
+    async def get_article_by_id(self, id: str) -> Article | None:
+        article = await self._db.execute(select(Article).where(Article.id == id))
+        return article.scalar_one_or_none()
+
     async def update_article(self, updated_article: Article) -> Article:
         self._db.add(updated_article)
         await self._db.commit()
