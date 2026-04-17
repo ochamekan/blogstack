@@ -1,7 +1,8 @@
+from datetime import datetime
 from typing import ClassVar
 from pydantic import BaseModel, ConfigDict, Field
 
-from src.articles.models import Article, ArticleStatus
+from src.articles.models import ArticleStatus
 
 
 class CreateArticleRequest(BaseModel):
@@ -15,13 +16,30 @@ class CreateArticleRequest(BaseModel):
 
 
 class UpdateArticleRequest(BaseModel):
-    title: str | None = None
+    model_config: ClassVar[ConfigDict] = {
+        "str_strip_whitespace": True,
+        "extra": "ignore",
+    }
+
+    title: str | None = Field(min_length=20)
     body: str | None = None
     status: ArticleStatus | None = None
+
+
+class ArticleDTO(BaseModel):
+    id: str
+    reading_time: str
+    author_id: str
+    title: str
+    body: str
+    slug: str
+    status: str
+    created_at: datetime
+    updated_at: datetime
 
 
 class GetArticlesResponse(BaseModel):
     total_pages: int
     current_page: int
     limit: int
-    data: list[Article] = []
+    data: list[ArticleDTO] = []

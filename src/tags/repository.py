@@ -14,9 +14,7 @@ class TagsRepository:
         return new_tag
 
     async def get_tags(self, q: str) -> list[Tag]:
-        result = await self._db.execute(
-            select(Tag).where(Tag.name.icontains(q.lower()))
-        )
+        result = await self._db.execute(select(Tag).where(Tag.name.icontains(q)))
         tags = list(result.scalars().all())
         return tags
 

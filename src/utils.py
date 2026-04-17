@@ -1,2 +1,5 @@
+from slugify import slugify
+
+
 def get_slug(raw_title: str) -> str:
-    return "-".join(raw_title.lower().split(" "))
+    return slugify(raw_title, max_length=50)

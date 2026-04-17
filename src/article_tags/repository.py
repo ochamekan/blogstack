@@ -11,4 +11,5 @@ class ArticleTagsRepository:
     ) -> list[ArticleTag]:
         tags = [ArticleTag(tag_id=id, article_id=article_id) for id in tag_ids]
         self._db.add_all(tags)
+        await self._db.commit()
         return tags

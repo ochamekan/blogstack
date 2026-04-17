@@ -2,11 +2,11 @@ from fastapi import status
 from src.exceptions import AppBaseException
 
 
-class TitleAlreadyExistsError(AppBaseException):
+class ArticleDuplicateTitleError(AppBaseException):
     def __init__(self) -> None:
         super().__init__(
-            message="Article with this title aready exists",
-            error_code="USER_DUPLICATE_TITLE_ERROR",
+            message="Article with this title already exist",
+            error_code="ARTICLE_DUPLICATE_TITLE_ERROR",
             status_code=status.HTTP_400_BAD_REQUEST,
         )
 

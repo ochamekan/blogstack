@@ -1,14 +1,14 @@
 from fastapi import APIRouter
 
 from src.article_tags.deps import ArticleTagsServiceDep
-from src.article_tags.schemes import AttachTagsRequest
+from src.article_tags.schemas import ArticleTagDTO, AttachTagsRequest
 from src.auth.deps import UserDep
 
 
 router = APIRouter(prefix="/articles", tags=["article tags"])
 
 
-@router.post("/{article_id}/tags")
+@router.post("/{article_id}/tags", response_model=list[ArticleTagDTO])
 async def attach_tags_to_article(
     service: ArticleTagsServiceDep,
     article_id: str,

@@ -16,12 +16,10 @@ class ArticlesRepository:
             .offset(limit * page - limit)
             .limit(limit)
         )
-        total_articles = await self._db.execute(
-            select(func.count()).select_from(Article)
-        )
-        total_articles = cast(int, total_articles.scalar())
+        result = await self._db.execute(select(func.count()).select_from(Article))
+        total_count = cast(int, result.scalar())
 
-        return (list(articles.scalars().all()), ceil(total_articles / limit))
+        return (list(articles.scalars().all()), ceil(total_count / limit))
 
     async def create_article(self, new_article: Article) -> Article:
         self._db.add(new_article)

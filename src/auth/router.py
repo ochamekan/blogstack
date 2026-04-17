@@ -2,14 +2,14 @@ from typing import Annotated
 from fastapi import APIRouter, Cookie, HTTPException, Response, status
 
 from src.auth.deps import AuthServiceDep, UserDep
-from src.auth.schemes import (
+from src.auth.schemas import (
     CreateUserRequest,
     CreateUserResponse,
-    GetCurrentUserRequest,
+    UserDTO,
     LoginRequest,
     LoginResponse,
 )
-from src.security.schemes import RefreshTokenResponse
+from src.security.schemas import RefreshTokenResponse
 
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -56,6 +56,6 @@ async def logout(response: Response):
     return {"message": "Logged out"}
 
 
-@router.get("/me", response_model=GetCurrentUserRequest)
+@router.get("/me", response_model=UserDTO)
 async def read_user(user: UserDep):
     return user

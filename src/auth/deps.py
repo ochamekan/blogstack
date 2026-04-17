@@ -1,12 +1,12 @@
 from typing import Annotated
 
 from fastapi import Depends
-from jwt import PyJWT
 import jwt
 
 from src.auth.exceptions import NotAuthenticatedError, UserNotFoundError
 from src.auth.models import User
 from src.auth.repository import AuthRepository
+from src.auth.schemas import UserDTO
 from src.auth.service import AuthService
 from src.deps import SessionDep
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -26,18 +26,20 @@ def get_auth_repo(db: SessionDep) -> AuthRepository:
     return AuthRepository(db)
 
 
+AuthRepositoryDep = Annotated[AuthRepository, Depends(get_auth_repo)]
+
+
 def get_auth_service(
     repo: AuthRepositoryDep,
 ) -> AuthService:
     return AuthService(repo)
 
 
-AuthRepositoryDep = Annotated[AuthRepository, Depends(get_auth_repo)]
 AuthServiceDep = Annotated[AuthService, Depends(get_auth_service)]
 TokenDep = Annotated[HTTPAuthorizationCredentials, Depends(bearer_scheme)]
 
 
-async def get_current_user(service: AuthServiceDep, creds: TokenDep) -> User:
+async def get_current_user(service: AuthServiceDep, creds: TokenDep) -> UserDTO:
     token = creds.credentials
 
     try:

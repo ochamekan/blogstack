@@ -9,9 +9,11 @@ def get_articles_repo(db: SessionDep) -> ArticlesRepository:
     return ArticlesRepository(db)
 
 
+ArticlesRepoDep = Annotated[ArticlesRepository, Depends(get_articles_repo)]
+
+
 def get_articles_service(repo: ArticlesRepoDep) -> ArticlesService:
     return ArticlesService(repo)
 
 
 ArticleServiceDep = Annotated[ArticlesService, Depends(get_articles_service)]
-ArticlesRepoDep = Annotated[ArticlesRepository, Depends(get_articles_repo)]

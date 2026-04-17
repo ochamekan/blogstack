@@ -1,11 +1,12 @@
 from src.articles.exceptions import (
     ArticleNotFoundError,
     ForbiddenError,
-    TitleAlreadyExistsError,
+    ArticleDuplicateTitleError,
 )
 from src.articles.models import Article, ArticleStatus
 from src.articles.repository import ArticlesRepository
-from src.articles.schemes import (
+from src.articles.schemas import (
+    ArticleDTO,
     CreateArticleRequest,
     GetArticlesResponse,
     UpdateArticleRequest,
@@ -22,15 +23,20 @@ class ArticlesService:
     async def get_articles(self, page: int, limit: int) -> GetArticlesResponse:
         articles, total_pages = await self._repo.get_articles(page, limit)
         return GetArticlesResponse(
-            total_pages=total_pages, current_page=page, limit=limit, data=articles
+            total_pages=total_pages,
+            current_page=page,
+            limit=limit,
+            data=[ArticleDTO.model_validate(a) for a in articles],
         )
 
-    async def create_article(self, data: CreateArticleRequest, user: User) -> Article:
+    async def create_article(
+        self, data: CreateArticleRequest, user: User
+    ) -> ArticleDTO:
         slug = get_slug(data.title)
         if await self._repo.get_article_by_slug(slug):
-            raise TitleAlreadyExistsError
+            raise ArticleDuplicateTitleError
 
-        a = Article(
+        new_article = Article(
             slug=slug,
             body=data.body,
             title=data.title,
@@ -38,32 +44,32 @@ class ArticlesService:
             reading_time=get_reading_time(data.body),
             status=ArticleStatus.PUBLISHED,
         )
-        new_article = await self._repo.create_article(a)
-        return new_article
+        a = await self._repo.create_article(new_article)
+        return ArticleDTO.model_validate(a)
 
-    async def get_aricle_by_slug(self, slug: str) -> Article:
+    async def get_article_by_slug(self, slug: str) -> ArticleDTO:
         article = await self._repo.get_article_by_slug(slug)
         if not article:
             raise ArticleNotFoundError
-        return article
+        return ArticleDTO.model_validate(article)
 
-    async def get_article_by_id(self, id: str) -> Article:
+    async def get_article_by_id(self, id: str) -> ArticleDTO:
         article = await self._repo.get_article_by_id(id)
         if not article:
             raise ArticleNotFoundError
-        return article
+        return ArticleDTO.model_validate(article)
 
     async def update_article(
-        self, data: UpdateArticleRequest, slug: str, user: User
-    ) -> Article:
-        article = await self._repo.get_article_by_slug(slug)
+        self, data: UpdateArticleRequest, id: str, user: User
+    ) -> ArticleDTO:
+        article = await self._repo.get_article_by_id(id)
         if not article:
             raise ArticleNotFoundError
         if not article.author_id == user.id:
             raise ForbiddenError
 
-        if data.title and await self._repo.get_article_by_slug(get_slug(data.title)):
-            raise TitleAlreadyExistsError
+        if data.title and article.title == data.title:
+            raise ArticleDuplicateTitleError
 
         if data.body:
             article.body = data.body
@@ -73,4 +79,6 @@ class ArticlesService:
         if data.status:
             article.status = data.status
 
-        return await self._repo.update_article(article)
+        updated_article = await self._repo.update_article(article)
+
+        return ArticleDTO.model_validate(updated_article)

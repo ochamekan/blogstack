@@ -25,6 +25,11 @@ class CreateUserResponse(BaseModel):
 
 
 class LoginRequest(BaseModel):
+    model_config: ClassVar[ConfigDict] = {
+        "str_strip_whitespace": True,
+        "extra": "ignore",
+    }
+
     email: EmailStr
     password: str
 
@@ -34,7 +39,7 @@ class LoginResponse(BaseModel):
     token_type: str
 
 
-class GetCurrentUserRequest(BaseModel):
+class UserDTO(BaseModel):
     id: str
     email: str
     fullname: str

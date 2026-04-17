@@ -10,9 +10,11 @@ def get_tags_repo(db: SessionDep) -> TagsRepository:
     return TagsRepository(db)
 
 
+TagsRepoDep = Annotated[TagsRepository, Depends(get_tags_repo)]
+
+
 def get_tags_service(repo: TagsRepoDep) -> TagsService:
     return TagsService(repo)
 
 
 TagsServiceDep = Annotated[TagsService, Depends(get_tags_service)]
-TagsRepoDep = Annotated[TagsRepository, Depends(get_tags_repo)]
