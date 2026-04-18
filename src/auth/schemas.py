@@ -40,6 +40,8 @@ class LoginResponse(BaseModel):
 
 
 class UserDTO(BaseModel):
+    model_config: ClassVar[ConfigDict] = {"from_attributes": True}
+
     id: str
     email: str
     fullname: str

@@ -21,14 +21,16 @@ class UpdateArticleRequest(BaseModel):
         "extra": "ignore",
     }
 
-    title: str | None = Field(min_length=20)
+    title: str | None = Field(default=None, min_length=20)
     body: str | None = None
     status: ArticleStatus | None = None
 
 
 class ArticleDTO(BaseModel):
+    model_config: ClassVar[ConfigDict] = {"from_attributes": True}
+
     id: str
-    reading_time: str
+    reading_time: int
     author_id: str
     title: str
     body: str

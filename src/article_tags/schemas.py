@@ -1,4 +1,5 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
+from typing import ClassVar
 
 
 class AttachTagsRequest(BaseModel):
@@ -6,5 +7,7 @@ class AttachTagsRequest(BaseModel):
 
 
 class ArticleTagDTO(BaseModel):
+    model_config: ClassVar[ConfigDict] = {"from_attributes": True}
+
     article_id: str
     tag_id: str

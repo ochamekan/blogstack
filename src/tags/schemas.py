@@ -1,4 +1,5 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
+from typing import ClassVar
 
 
 class CreateTagRequest(BaseModel):
@@ -6,6 +7,8 @@ class CreateTagRequest(BaseModel):
 
 
 class TagDTO(BaseModel):
+    model_config: ClassVar[ConfigDict] = {"from_attributes": True}
+
     name: str
     slug: str
     id: str
