@@ -9,3 +9,12 @@ class ClapsMaxCountError(AppBaseException):
             error_code="CLAPS_MAX_COUNT_ERROR",
             status_code=status.HTTP_400_BAD_REQUEST,
         )
+
+
+class ConstraintViolation(AppBaseException):
+    def __init__(self) -> None:
+        super().__init__(
+            message="Constraint violation",
+            error_code="CONSTRAINT_VIOLATION",
+            status_code=status.HTTP_400_BAD_REQUEST,
+        )

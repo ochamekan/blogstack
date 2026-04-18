@@ -4,7 +4,7 @@ from src.articles.repository import ArticlesRepository
 from src.auth.schemas import UserDTO
 from src.claps.repository import ClapRepository
 from src.claps.schemas import ClapDTO
-from src.claps.exceptions import ClapsMaxCountError
+from src.claps.exceptions import ClapsMaxCountError, ConstraintViolation
 from src.utils import get_constraint_name_from_integrity_error
 
 
@@ -30,6 +30,6 @@ class ClapService:
             constraint_name = get_constraint_name_from_integrity_error(e)
             if constraint_name == "ck_claps_max_count_50":
                 raise ClapsMaxCountError
-            raise
+            raise ConstraintViolation
 
         return ClapDTO.model_validate(updated_clap)

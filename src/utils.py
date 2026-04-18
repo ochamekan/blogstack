@@ -8,7 +8,7 @@ def get_slug(raw_title: str) -> str:
 
 
 def get_constraint_name_from_integrity_error(exc: IntegrityError) -> str | None:
-    """Extract constraint name from SQLAlchemy IntegrityError with asyncpg. (vibecoded)"""
+    """Extract constraint name from SQLAlchemy IntegrityError with asyncpg. Can't find any info in official docs so i vibecoded it"""
     for candidate in (
         exc.orig,
         getattr(exc.orig, "__cause__", None),
