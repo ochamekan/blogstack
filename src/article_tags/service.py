@@ -4,7 +4,7 @@ from src.article_tags.repository import ArticleTagsRepository
 from src.article_tags.schemas import ArticleTagDTO
 from src.articles.exceptions import ArticleNotFoundError, ForbiddenError
 from src.articles.repository import ArticlesRepository
-from src.auth.models import User
+from src.auth.schemas import UserDTO
 
 
 class ArticleTagsService:
@@ -17,7 +17,7 @@ class ArticleTagsService:
         self._repo: ArticleTagsRepository = repo
 
     async def attach_tags_to_article(
-        self, article_id: str, data: list[str], user: User
+        self, article_id: str, data: list[str], user: UserDTO
     ) -> list[ArticleTagDTO]:
         article = await self._articles_repo.get_article_by_id(article_id)
         if not article:

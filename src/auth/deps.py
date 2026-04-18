@@ -62,4 +62,4 @@ async def get_current_user(service: AuthServiceDep, creds: TokenDep) -> UserDTO:
     return user
 
 
-UserDep = Annotated[User, Depends(get_current_user)]
+UserDep = Annotated[UserDTO, Depends(get_current_user)]

@@ -12,7 +12,7 @@ from src.articles.schemas import (
     UpdateArticleRequest,
 )
 from src.articles.utils import get_reading_time
-from src.auth.models import User
+from src.auth.schemas import UserDTO
 from src.utils import get_slug
 
 
@@ -30,7 +30,7 @@ class ArticlesService:
         )
 
     async def create_article(
-        self, data: CreateArticleRequest, user: User
+        self, data: CreateArticleRequest, user: UserDTO
     ) -> ArticleDTO:
         slug = get_slug(data.title)
         if await self._repo.get_article_by_slug(slug):
@@ -60,7 +60,7 @@ class ArticlesService:
         return ArticleDTO.model_validate(article)
 
     async def update_article(
-        self, data: UpdateArticleRequest, id: str, user: User
+        self, data: UpdateArticleRequest, id: str, user: UserDTO
     ) -> ArticleDTO:
         article = await self._repo.get_article_by_id(id)
         if not article:
