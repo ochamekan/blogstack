@@ -1,11 +1,9 @@
-from sqlalchemy.exc import IntegrityError
 from src.articles.exceptions import ArticleNotFoundError
 from src.articles.repository import ArticlesRepository
 from src.auth.schemas import UserDTO
 from src.claps.repository import ClapRepository
-from src.claps.schemas import ClapDTO
-from src.claps.exceptions import ClapsMaxCountError, ConstraintViolation
-from src.utils import get_constraint_name_from_integrity_error
+from src.claps.schemas import DeleteClapsResponse, IncrementClapsResponse
+# from src.utils import get_constraint_name_from_integrity_error
 
 
 class ClapService:
@@ -13,23 +11,21 @@ class ClapService:
         self._repo: ClapRepository = repo
         self._article_repo: ArticlesRepository = article_repo
 
-    async def increment_clap(self, article_id: str, user: UserDTO) -> ClapDTO:
+    async def increment_clap(
+        self, article_id: str, user: UserDTO
+    ) -> IncrementClapsResponse:
         article = await self._article_repo.get_article_by_id(article_id)
         if not article:
             raise ArticleNotFoundError
 
-        clap = await self._repo.get_clap(article_id, user.id)
-
+        clap = await self._repo.get_clap(article.id, user.id)
         if not clap:
-            new_clap = await self._repo.create_clap(article_id, user.id)
-            return ClapDTO.model_validate(new_clap)
+            total = await self._repo.create_clap(article.id, user.id)
+            return IncrementClapsResponse(total=total)
 
-        try:
-            updated_clap = await self._repo.increment_clap(clap.id)
-        except IntegrityError as e:
-            constraint_name = get_constraint_name_from_integrity_error(e)
-            if constraint_name == "ck_claps_max_count_50":
-                raise ClapsMaxCountError
-            raise ConstraintViolation
+        total = await self._repo.increment_clap(clap.id, article.id)
+        return IncrementClapsResponse(total=total)
 
-        return ClapDTO.model_validate(updated_clap)
+    async def delete_claps(self, article_id: str, user: UserDTO) -> DeleteClapsResponse:
+        total = await self._repo.delete_claps(article_id, user.id)
+        return DeleteClapsResponse(total=total)

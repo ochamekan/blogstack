@@ -18,3 +18,12 @@ class ConstraintViolation(AppBaseException):
             error_code="CONSTRAINT_VIOLATION",
             status_code=status.HTTP_400_BAD_REQUEST,
         )
+
+
+class ClapsOrArticleNotFoundError(AppBaseException):
+    def __init__(self) -> None:
+        super().__init__(
+            message="Claps or article not found",
+            error_code="CLAPS_ARTICLE_NOT_FOUND",
+            status_code=status.HTTP_400_BAD_REQUEST,
+        )

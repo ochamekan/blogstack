@@ -11,3 +11,11 @@ class ClapDTO(BaseModel):
     article_id: str
     count: int = Field(le=50)
     created_at: datetime
+
+
+class IncrementClapsResponse(BaseModel):
+    total: int
+
+
+class DeleteClapsResponse(BaseModel):
+    total: int
