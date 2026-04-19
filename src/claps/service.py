@@ -3,7 +3,6 @@ from src.articles.repository import ArticlesRepository
 from src.auth.schemas import UserDTO
 from src.claps.repository import ClapRepository
 from src.claps.schemas import DeleteClapsResponse, IncrementClapsResponse
-# from src.utils import get_constraint_name_from_integrity_error
 
 
 class ClapService:

@@ -29,7 +29,6 @@ class ClapRepository:
         if clap.count < 50:
             clap.count += 1
             await self._db.commit()
-            await self._db.refresh(clap)
 
         total = await self.get_total_claps(article_id)
         return total
