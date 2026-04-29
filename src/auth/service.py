@@ -8,9 +8,6 @@ from src.auth.repository import AuthRepository
 from src.auth.schemas import CreateUserRequest, LoginRequest, UserDTO
 from src.security.exceptions import (
     InvalidTokenSignatureError,
-    MalformedTokenError,
-    TokenDecodeError,
-    TokenExpiredError,
 )
 from src.security.jwt import (
     TokenType,
