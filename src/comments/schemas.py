@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import ClassVar
 from pydantic import BaseModel, ConfigDict
 
@@ -8,11 +9,11 @@ class CommentDTO(BaseModel):
     id: str
     user_id: str
     article_id: str
-    parent_id: str
+    parent_id: str | None
     content: str
     is_deleted: bool
-    created_at: str
-    updated_at: str
+    created_at: datetime
+    updated_at: datetime
 
 
 class CreateCommentRequest(BaseModel):

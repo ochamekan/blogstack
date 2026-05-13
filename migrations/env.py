@@ -7,13 +7,14 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
 
-from src.auth.models import Base
+from src.auth.models import Base  # pyright: ignore[reportPrivateLocalImportUsage]
 from src.config import settings
 from src.auth.models import *  # noqa: F403
 from src.articles.models import *  # noqa: F403
 from src.tags.models import *  # noqa: F403
 from src.article_tags.models import *  # noqa: F403
 from src.claps.models import *  # noqa: F403
+from src.comments.models import *  # noqa: F403
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
